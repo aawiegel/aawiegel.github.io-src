@@ -12,6 +12,8 @@ TIMEZONE = 'US/Pacific'
 
 DEFAULT_LANG = 'en'
 
+THEME = '/home/aaron/projects/pelican-themes/blueidea'
+
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
