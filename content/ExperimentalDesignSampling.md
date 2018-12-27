@@ -95,7 +95,7 @@ We can use this same code snippet (rewritten as a function in the code on Github
 
 <img src="{static}/images/well_other_impurity.png" alt="Distribution of the other impurity. Note the distinctly non-normal distribution" style="width: 100%;"/>
 
-Much like the pure yield, most of these metrics have a mostly normal distribution, although sometimes we were lucky enough to get 99.9% pure product and thus 0% n-1 and n+1. In contrast, other_impurity has a distinctly non-normal distribution, where most of the values cluster near 0 with a few extreme values near 1. This is clearly an unusual distribution compared to the rest of the metrics, so we will come back to this later.
+Much like the pure yield, most of these metrics have a mostly normal distribution, although sometimes we were lucky enough to get 99.9% pure product and thus 0% n-1 and n+1. In contrast, other_impurity has a distinctly non-normal distribution, where most of the values cluster near 0 with a few extreme values near 1. This is clearly an unusual distribution compared to the rest of the metrics, but we will ignore this for now.
 
 To get a sense for how the different metrics might be interrelated (if at all), we can also plot the correlation between the various metrics as a heatmap.
 
@@ -127,7 +127,7 @@ for synthesis_id, group in df.groupby('synthesis_id'):
 synthesis_df = pd.DataFrame(results)
 ```
 
-Now we have a new data frame of length 1000 that summarizes each of the syntheses in our original data set. We could also look at other summary statistics besides the mean here, but for now let's focus on the behavior of a couple of the synthesis means. Shown below is a plot comparing the distribution of the pure yields on each well to the distribution of the mean pure yield on each synthesis (with only the KDE of each distribution shown for clarity.)
+Now we have a new data frame of length 1000 that summarizes each of the syntheses in our original data set. We could also look at other summary statistics besides the mean here, but for now let's focus on the behavior the synthesis means. Shown below is a plot comparing the distribution of the pure yields on each well to the distribution of the mean pure yield on each synthesis (with only the KDE of each distribution shown for clarity.)
 
 <img src="{static}/images/well_synthesis_pure_yield_comparison.png" alt="Comparison of the distributions of the well pure yield to the synthesis pure yield mean" style="width: 100%;"/>
 
@@ -156,7 +156,48 @@ Once we've generated these samples, we can then plot the distribution of the sam
 
 Why do we see a much narrower distribution for a random sample of 96 wells versus the 96 wells on a synthesis? For that, we turn to the Central Limit Theorem.
 
+## Experimental Design, Independence, and the Central Limit Theorem
+
 ## Central Limit Theorem
 
- The Central Limit Thoerem, one of the most important theorems in statistics and probability, describes what to expect mathematically when we sample from a population of an _independent_, _identically distributed_ parameter with mean $\mu$ and variance $\sigma^2$. Namely, if we generate random samples of this parameter of size _n_, the sample mean $\bar{x}$ will approximate a normal distribution with mean $\mu$ and variance $\sigma^2 / n$ as $n$ increases. 
+ The Central Limit Thoerem, one of the most important theorems in statistics and probability, describes what to expect mathematically when we sample from a population of an _independent_, _identically distributed_ parameter with mean $\mu$ and variance $\sigma^2$. Namely, if we generate random samples of this parameter of size _n_, the sample mean $\bar{x}$ will approximate a normal distribution with mean $\mu$ and variance $\sigma^2 / n$ as $n$ increases.
+ 
+ Therefore, a random sample of 96 wells should have a variance equal to the population variance divided by 96. Let's compare the variance for the entire population of wells, synthesis means, random sample means, and predictions of the Central Limit Theorem.
+ 
+ | Group             | Mean  | Variance  |
+ | ----------------- | ----- | --------- |
+ | Well (Population) | 6.986 | 3.264     |
+ | Synthesis         | 6.986 | 2.275     |
+ | Random Sample     | 6.983 | 0.032     |
+ | Predicted         | 6.986 | 0.034     |
+ 
+ Clearly, the random sample matches our predictions from the Central Limit Theorem, and the 96 wells on an individual synthesis are not independent. We can see this another way by comparing the means between arbitrary subsets of a synthesis or random sample. In this case, I just compared the mean for wells on the left half of the 96-well plate to the mean for wells on the right half of the 96-well plate for a synthesis or random sample. For 96-well random samples, we see almost no correlation between the means from each side as shown below:
+ 
+ <img src="{static}/images/random_correlation.png" alt="Comparison of means for left-side wells to right-side wells for a random sample" style="width: 100%" />
+ 
+In contrast, when we compare the means on the left side of the plate with those for the right side of the plate, we see a pretty clear relationship as shown below:
+
+<img src="{static}/images/plate_correlation.png" alt="Comparison of means for left-side wells to right-side wells for a synthesis" style="width: 100%" />
+
+Thus, the wells on a synthesis are not independent units but are actually interdependent for the reasons mentioned above (e.g., a bad reagent bottle affects the whole synthesis, etc.)  
+
+## Experimental Design Consequences
+
+OK, so what? Sure, the Central Limit Theorem, indepdence, and all that are interesting in an abstract sense, but how does this help design better experiments? Well, if we're not careful about independence in our experimental design, we could end up with spurious results! 
+
+For example, let's suppose we are testing whether some new process change has a positive effect on pure yield. Our null and alternative hypotheses would then be the following:
+
+$H_0: \text{pure yield}_{\text{new}} = \text{pure yield}_{\text{old}}$
+
+$H_a: \text{pure yield}_{\text{new}} > \text{pure yield}_{\text{old}}$   
+
+We then run a single control synthesis with our old process and a single treatment synthesis with our new process and get the following results:
+
+| Synthesis ID | Experimental Group | Mean  | Standard Deviation |
+| ------------ | ------------------ | ----- | ------------------ |
+| 3            | Control            | 5.925 | 0.932              |
+| 4            | Treatment          | 8.995 | 1.036              |
+
+Looks promising, right? We then naively assume that each well is independent and run our experimental results through a _t_-test, and whoa, our _t_-statistic is 21.6 with a _p_-value of $5 \times 10^{-53}$! We should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
+ 
  
