@@ -12,7 +12,7 @@ TIMEZONE = 'US/Pacific'
 
 DEFAULT_LANG = 'en'
 
-THEME = '/home/aaron/projects/pelican-themes/blueidea'
+THEME = '/Users/aaron.wiegel/side/pelican-themes/blueidea'
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -36,3 +36,7 @@ STATIC_PATHS = ['images']
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
+
+# Plug-ins
+PLUGIN_PATHS = ['/Users/aaron.wiegel/side/pelican-plugins']
+PLUGINS = ['render_math']

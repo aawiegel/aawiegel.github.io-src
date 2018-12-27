@@ -1,1 +1,6 @@
 *.pyc
+
+*.idea/
+
+# OS X Desktop Service Store
+*.DS_Store

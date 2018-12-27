@@ -3,7 +3,7 @@ Date: 2017-11-7
 Category: Projects
 Authors: Aaron Wiegel
 
-<i>This is a follow up to a previous <a href="{filename}/Poochr.md">post</a>.</i>
+<i>This is a follow up to a previous <a href="{static}/Poochr.md">post</a>.</i>
 
 ## Overview
 
@@ -15,7 +15,7 @@ In the previous version of Poochr, I used topic modeling of a corpus describing 
 
 <br/>
 
-<img src="{filename}/images/burnese.jpg"/>
+<img src="{static}/images/burnese.jpg"/>
 
 Pro-tip for Poochr: Not a dog that belongs in an apartment.
 

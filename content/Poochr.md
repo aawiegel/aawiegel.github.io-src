@@ -5,7 +5,7 @@ Authors: Aaron Wiegel
 
 # Dog breed recommendations
 
-The [code](https://github.com/aawiegel/Poochr) is available online. This is part of a two part series where the second part can be found [here]({filename}/Poochr-2-Electric-Dogaloo.md).
+The [code](https://github.com/aawiegel/Poochr) is available online. This is part of a two part series where the second part can be found [here]({static}/Poochr-2-Electric-Dogaloo.md).
 
 ## Summary
 
@@ -13,7 +13,7 @@ Recently, my house mate decided to get a Siberian husky because it is a pretty d
 
 <br/>
 
-<img src="{filename}/images/bella.jpg" alt="a very active, vocal, and social dog" style="width: 100%;"/>
+<img src="{static}/images/bella.jpg" alt="a very active, vocal, and social dog" style="width: 100%;"/>
 
 A rare moment where she is actually sitting still (getting a picture that wasn't a blur was the hardest part of this project.)
 
@@ -43,7 +43,7 @@ After using class weights, the accuracy rose to about 92% on the test set, altho
 
 <br/>
 
-<img src="{filename}/images/samoyed.jpg" style="width: 100%;"/>
+<img src="{static}/images/samoyed.jpg" style="width: 100%;"/>
 
 Apparently Poochr likes really big, poofy white dogs.
 
@@ -51,7 +51,7 @@ Apparently Poochr likes really big, poofy white dogs.
 
 Other dog breeds, particularly ones that looked very similar to each other, could not be so easily identified. For example, Australian terriers (21% accuracy) and Yorkshire terriers (31% accuracy) look very similar:
 
-<img src="{filename}/images/australian_terrier.jpg" alt="Australian Terrier" style="width:50%;"/><img src="{filename}/images/yorkshire_terrier.jpg" alt="Yorkshire Terrier" style="width=50%;"/>
+<img src="{static}/images/australian_terrier.jpg" alt="Australian Terrier" style="width:50%;"/><img src="{static}/images/yorkshire_terrier.jpg" alt="Yorkshire Terrier" style="width=50%;"/>
 
 Can you tell which is which? Yeah, the model can't really either.
 
@@ -85,4 +85,4 @@ I deployed Poochr as a [web app](https://poochr-182700.appspot.com/) using Googl
 
 Other features that came up that users were interested in were allowing URLs for images instead of just uploading, providing stock dog images in case you did not have one, and being able to adjust the recommendation based on how much to weight the appearance vs. temperament. I'd also personally like to add a way for users to input feedback more directly. With a better quality corpus, I'd also like to evaluate the performance between topic models, especially since LDA tends to perform better with smaller but longer documents. With better recommendations, hopefully more people can avoid the situation my house mate is in!
 
-This is part of a two part series where the second part can be found [here]({filename}/Poochr-2-Electric-Dogaloo.md).
+This is part of a two part series where the second part can be found [here]({static}/Poochr-2-Electric-Dogaloo.md).

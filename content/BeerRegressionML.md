@@ -11,7 +11,7 @@ To help obtain this information, I web crawled [BeerAdvocate](https://www.beerad
 
 I obtained approximately 35,000 beers with valid BeerAdvocate scores. The distribution of scores is shown below:
 
-<img src="{filename}/images/ba_hist.png" alt="BeerAdvocate score histogram" style="width: 90%;"/>
+<img src="{static}/images/ba_hist.png" alt="BeerAdvocate score histogram" style="width: 90%;"/>
 
 Most of the beers receive scores of about 85 with an approximately symmetric distribution. Few beers in this subset received ratings lower than 70, although this particular subset includes only ales, which tend to be more highly rated. Lagers (the kind of beer most non-beer geeks are familiar with) such as [Budweiser](https://www.beeradvocate.com/beer/profile/29/65/) are generally very poorly rated except for, "inexplicably", [Pabst Blue Ribbon](https://www.beeradvocate.com/beer/profile/447/1331/) and [Schlitz](https://www.beeradvocate.com/beer/profile/106/44315/) (Hipsters!!!! *shakes fist*). I did not include lagers for this project, although I did include them for a beer recommendation system I developed later.
 
@@ -39,10 +39,10 @@ In any case, Lasso is a method of linear regression that helps prevent the model
 
 Graphing the coefficients (including the sensory information) can give us an idea of which characteristics best predicted the beer's rating and which characteristics did not matter (that is, were zero).
 
-<img src="{filename}/images/coefficients_all.png" alt="Regression coefficients" style="width: 90%;"/>
+<img src="{static}/images/coefficients_all.png" alt="Regression coefficients" style="width: 90%;"/>
 
 As discussed above, traits like taste and smell were strongly associated with a high rating (surprise, people like beer that tastes and smells good!) More interestingly, the number of ratings was strongly correlated with the BeerAdvocate score, which I interpreted to partially be a sign of hype. Traits that the brewer has more control over (hue, abv, etc.) played a more minor effect on the final rating, but I have plotted them below regardless:
 
-<img src="{filename}/images/coefficients_zoomed.png" alt="Detailed coefficients" style="width: 90%;" />
+<img src="{static}/images/coefficients_zoomed.png" alt="Detailed coefficients" style="width: 90%;" />
 
 Here, we can see that hoppy, sour, and German beers along with beers high in alcohol tend to get better scores. Again, these effects are minor, so I would suggest focusing on marketing as I discussed above.

@@ -6,13 +6,13 @@ With all the hype around data science as a profession (21st century's sexiest jo
 
 # The hype
 
-<img src="{filename}/images/hype.jpeg" alt="Sexy Data Science Fun Times!" style="width: 100%;"/>
+<img src="{static}/images/hype.jpeg" alt="Sexy Data Science Fun Times!" style="width: 100%;"/>
 
 By Libertinus via Wikimedia Commons
 
 # The reality
 
-<img src="{filename}/images/data_cleaning.jpg" alt="Get in there and clean those data toilets, data janitors" style="width: 100%;"/>
+<img src="{static}/images/data_cleaning.jpg" alt="Get in there and clean those data toilets, data janitors" style="width: 100%;"/>
 
 # Data Science is a highly technical field, but don't let that daunt you
 
