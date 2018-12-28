@@ -68,7 +68,6 @@ Of course, before we dive too much into anything, we need to explore the data! (
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import scipy
 
 df = pd.read_csv('synthetic_data.csv')
 
@@ -156,26 +155,26 @@ Once we've generated these samples, we can then plot the distribution of the sam
 
 Why do we see a much narrower distribution for a random sample of 96 wells versus the 96 wells on a synthesis? For that, we turn to the Central Limit Theorem.
 
-## Experimental Design, Independence, and the Central Limit Theorem
+## Experimental Design, Sampling, and the Central Limit Theorem
 
 ## Central Limit Theorem
 
- The Central Limit Thoerem, one of the most important theorems in statistics and probability, describes what to expect mathematically when we sample from a population of an _independent_, _identically distributed_ parameter with mean $\mu$ and variance $\sigma^2$. Namely, if we generate random samples of this parameter of size _n_, the sample mean $\bar{x}$ will approximate a normal distribution with mean $\mu$ and variance $\sigma^2 / n$ as $n$ increases.
+ The Central Limit Thoerem, one of the most important theorems in statistics and probability, describes what to expect mathematically when we randomly sample from a population of an _independent_, _identically distributed_ parameter with mean $\mu$ and standard deviation $\sigma$. Namely, if we generate random samples of this parameter of size _n_, the sample mean $\bar{x}$ will approximate a normal distribution with mean $\mu$ and standard deviation $\sigma / \sqrt{n}$ as $n$ increases.
  
- Therefore, a random sample of 96 wells should have a variance equal to the population variance divided by 96. Let's compare the variance for the entire population of wells, synthesis means, random sample means, and predictions of the Central Limit Theorem.
+ Therefore, a random sample of 96 wells should have a standard deviation equal to the population standard deviation divided by the square root of 96. Let's compare the standard deviation for the entire population of wells, synthesis means, random sample means, and predictions of the Central Limit Theorem.
  
- | Group             | Mean  | Variance  |
- | ----------------- | ----- | --------- |
- | Well (Population) | 6.986 | 3.264     |
- | Synthesis         | 6.986 | 2.275     |
- | Random Sample     | 6.983 | 0.032     |
- | Predicted         | 6.986 | 0.034     |
+ | Group             | Mean  | Standard Deviation |
+ | ----------------- | ----- | ------------------ |
+ | Well (Population) | 6.986 | 1.807              |
+ | Synthesis         | 6.986 | 1.508              |
+ | Random Sample     | 6.983 | 0.178              |
+ | Predicted         | 6.986 | 0.184              |
  
- Clearly, the random sample matches our predictions from the Central Limit Theorem, and the 96 wells on an individual synthesis are not independent. We can see this another way by comparing the means between arbitrary subsets of a synthesis or random sample. In this case, I just compared the mean for wells on the left half of the 96-well plate to the mean for wells on the right half of the 96-well plate for a synthesis or random sample. For 96-well random samples, we see almost no correlation between the means from each side as shown below:
+ Clearly, the random sample matches our predictions from the Central Limit Theorem, and the 96 wells on an individual synthesis are not random samples from the larger population of wells. We can see this another way by comparing the means between arbitrary subsets of a synthesis or random sample. In this case, I just compared the mean for wells on the left half of the 96-well plate to the mean for wells on the right half of the 96-well plate for a synthesis or random sample. For 96-well random samples, we see almost no correlation between the means from each side as shown below:
  
  <img src="{static}/images/random_correlation.png" alt="Comparison of means for left-side wells to right-side wells for a random sample" style="width: 100%" />
  
-In contrast, when we compare the means on the left side of the plate with those for the right side of the plate, we see a pretty clear relationship as shown below:
+In contrast, when we compare the means on the left side of the plate with those for the right side of the same synthesis, we see a pretty clear relationship as shown below:
 
 <img src="{static}/images/plate_correlation.png" alt="Comparison of means for left-side wells to right-side wells for a synthesis" style="width: 100%" />
 
@@ -183,7 +182,7 @@ Thus, the wells on a synthesis are not independent units but are actually interd
 
 ## Experimental Design Consequences
 
-OK, so what? Sure, the Central Limit Theorem, indepdence, and all that are interesting in an abstract sense, but how does this help design better experiments? Well, if we're not careful about independence in our experimental design, we could end up with spurious results! 
+OK, so what? Sure, the Central Limit Theorem, sampling, independence, and all that are interesting in an abstract sense, but how does this help design better experiments? Well, if we're not careful about randomization in our experimental design, we could end up with spurious results! 
 
 For example, let's suppose we are testing whether some new process change has a positive effect on pure yield. Our null and alternative hypotheses would then be the following:
 
@@ -198,6 +197,53 @@ We then run a single control synthesis with our old process and a single treatme
 | 3            | Control            | 5.925 | 0.932              |
 | 4            | Treatment          | 8.995 | 1.036              |
 
-Looks promising, right? We then naively assume that each well is independent and run our experimental results through a _t_-test, and whoa, our _t_-statistic is 21.6 with a _p_-value of $5 \times 10^{-53}$! We should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
+Looks promising, right? We then naively assume that each well is independent and that a synthesis is a random sample of 96 wells. We perform a _t_-test with our experimental results and those assumptions as shown below:
+```python
+import scipy
+
+control_mask = df.synthesis_id == 3
+treatment_mask = df.synthesis_id == 4
+
+t_test_results = scipy.stats.ttest_ind(df.loc[treatment_mask, 'pure_yield'], 
+                                       df.loc[control_mask, 'pure_yield']) 
+print(t_test_results)
+# Output: Ttest_indResult(statistic=21.579125882009635, pvalue=5.402301203063555e-53) 
+``` 
  
+Whoa, our _t_-statistic is 21.6 with a _p_-value of $5 \times 10^{-53}$; we should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
+
+Unfortunately, one of the key assumptions of the _t_ test is that the samples have been randomly drawn from the larger population. As we discussed earlier, a synthesis is not a random sample of 96 wells, though! So, our new process change might be amazing, but we don't have enough evidence of that yet. (Whether we're super geniuses also remains to be seen.) Realizing this, we perform several more syntheses to test our new process change:
+
+| Synthesis ID | Experimental Group | Mean  | Standard Deviation |
+| ------------ | ------------------ | ----- | ------------------ |
+| 3            | Control            | 5.925 | 0.932              |
+| 4            | Treatment          | 8.995 | 1.036              |
+| 5            | Control            | 4.962 | 1.069              |
+| 6            | Treatment          | 6.153 | 1.048              |
+| 7            | Control            | 7.703 | 0.837              |
+| 8            | Treatment          | 6.850 | 0.977              |
+| 9            | Control            | 9.458 | 0.990              |
+| 10           | Treatment          | 7.141 | 1.030              |
+
+We then run our _t_-test again, this time using the synthesis mean instead of the data from all 96 wells.
+
+```python
+control_mask = synthesis_df.synthesis_id.isin([3, 5, 7, 9])
+treatment_mask = synthesis_df.synthesis_id.isin([4, 6, 8, 10])
+
+t_test_results = scipy.stats.ttest_ind(synthesis_df.loc[treatment_mask, 'pure_yield'],
+                                       synthesis_df.loc[control_mask, 'pure_yield'])
+
+print(t_test_results)
+# Output: Ttest_indResult(statistic=0.23432685490410793, pvalue=0.8225225687422346)
+```
  
+After correctly applying the _t_ test using appropriate assumptions, we find that we actually do not have enough evidence to reject the null hypothesis. Unfortunately, our new process is not nearly as amazing as we might have thought. (We still might be super geniuses, though.) Of course, we could be seeing a false negative since we may not done enough experiments yet, but that is a subject for another blog post. Either way, had we rushed into running a statistical test without thinking through the underlying assumptions, we could have made erroneous business or scientific recommendations that could have disasterous consequences! (Money lost, papers retracted, or worse)
+
+# Summary
+
+When designing experiments, thinking through and verifying the assumptions of the planned statistical tests ensures that the results are valid. Statistical simulations are a powerful tool to verify these assumptions using existing data, and pandas makes them incredibly simple to perform! Even though you will probably just end up verifying the Central Limit Theorem, in some cases, like the syntheses here, simulation can help clarify key assumptions for experimental design. Simulation can also be used to calculate statistical power (the number of experiments needed to avoid a false positive), but that is a subject for another post!
+
+## Aside: Sampling from non-normal distributions
+
+Placeholder text
