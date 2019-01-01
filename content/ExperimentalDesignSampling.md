@@ -165,10 +165,10 @@ Why do we see a much narrower distribution for a random sample of 96 wells versu
  
  | Group             | Mean  | Standard Deviation |
  | ----------------- | ----- | ------------------ |
- | Well (Population) | 6.986 | 1.807              |
- | Synthesis         | 6.986 | 1.508              |
- | Random Sample     | 6.983 | 0.178              |
- | Predicted         | 6.986 | 0.184              |
+ | Well (Population) | 9.976 | 2.922              |
+ | Synthesis         | 9.976 | 2.513              |
+ | Random Sample     | 9.981 | 0.291              |
+ | Predicted         | 9.976 | 0.298              |
  
  Clearly, the random sample matches our predictions from the Central Limit Theorem, and the 96 wells on an individual synthesis are not random samples from the larger population of wells. We can see this another way by comparing the means between arbitrary subsets of a synthesis or random sample. In this case, I just compared the mean for wells on the left half of the 96-well plate to the mean for wells on the right half of the 96-well plate for a synthesis or random sample. For 96-well random samples, we see almost no correlation between the means from each side as shown below:
  
@@ -192,10 +192,10 @@ $H_a: \text{pure yield}_{\text{new}} > \text{pure yield}_{\text{old}}$
 
 We then run a single control synthesis with our old process and a single treatment synthesis with our new process and get the following results:
 
-| Synthesis ID | Experimental Group | Mean  | Standard Deviation |
-| ------------ | ------------------ | ----- | ------------------ |
-| 3            | Control            | 5.925 | 0.932              |
-| 4            | Treatment          | 8.995 | 1.036              |
+| Synthesis ID | Experimental Group | Mean   | Standard Deviation |
+| ------------ | ------------------ | ------ | ------------------ |
+| 3            | Control            | 8.211  | 1.399              |
+| 4            | Treatment          | 13.314 | 1.554              |
 
 Looks promising, right? We then naively assume that each well is independent and that a synthesis is a random sample of 96 wells. We perform a _t_-test with our experimental results and those assumptions as shown below:
 ```python
@@ -210,20 +210,20 @@ print(t_test_results)
 # Output: Ttest_indResult(statistic=21.579125882009635, pvalue=5.402301203063555e-53) 
 ``` 
  
-Whoa, our _t_-statistic is 21.6 with a _p_-value of $5 \times 10^{-53}$; we should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
+Whoa, our _t_-statistic is 23.9 with a _p_-value of $3 \times 10^{-59}$; we should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
 
 Unfortunately, one of the key assumptions of the _t_ test is that the samples have been randomly drawn from the larger population. As we discussed earlier, a synthesis is not a random sample of 96 wells, though! So, our new process change might be amazing, but we don't have enough evidence of that yet. (Whether we're super geniuses also remains to be seen.) Realizing this, we perform several more syntheses to test our new process change:
 
-| Synthesis ID | Experimental Group | Mean  | Standard Deviation |
-| ------------ | ------------------ | ----- | ------------------ |
-| 3            | Control            | 5.925 | 0.932              |
-| 4            | Treatment          | 8.995 | 1.036              |
-| 5            | Control            | 4.962 | 1.069              |
-| 6            | Treatment          | 6.153 | 1.048              |
-| 7            | Control            | 7.703 | 0.837              |
-| 8            | Treatment          | 6.850 | 0.977              |
-| 9            | Control            | 9.458 | 0.990              |
-| 10           | Treatment          | 7.141 | 1.030              |
+| Synthesis ID | Experimental Group | Mean   | Standard Deviation |
+| ------------ | ------------------ | ------ | ------------------ |
+| 3            | Control            | 8.211  | 1.399              |
+| 4            | Treatment          | 13.314 | 1.554              |
+| 5            | Control            | 6.607  | 1.603              |
+| 6            | Treatment          | 8.603  | 1.571              |
+| 7            | Control            | 11.220 | 1.255              |
+| 8            | Treatment          | 9.755  | 1.465              |
+| 9            | Control            | 14.086 | 1.485              |
+| 10           | Treatment          | 10.249 | 1.545              |
 
 We then run our _t_-test again, this time using the synthesis mean instead of the data from all 96 wells.
 
@@ -242,8 +242,4 @@ After correctly applying the _t_ test using appropriate assumptions, we find tha
 
 # Summary
 
-When designing experiments, thinking through and verifying the assumptions of the planned statistical tests ensures that the results are valid. Statistical simulations are a powerful tool to verify these assumptions using existing data, and pandas makes them incredibly simple to perform! Even though you will probably just end up verifying the Central Limit Theorem, in some cases, like the syntheses here, simulation can help clarify key assumptions for experimental design. Simulation can also be used to calculate statistical power (the number of experiments needed to avoid a false positive), but that is a subject for another post!
-
-## Aside: Sampling from non-normal distributions
-
-Placeholder text
+When designing experiments, thinking through and verifying the assumptions of the planned statistical tests ensures that the results are valid. Statistical simulations are a powerful tool to verify these assumptions using existing data, and pandas makes them incredibly simple to perform! Even though you will probably just end up verifying the Central Limit Theorem, in some cases, like the syntheses here, simulation can help clarify key assumptions for experimental design. Simulation can also be used to calculate statistical power (the number of experiments needed to avoid a false positive), but that is a subject for another post. There's also some additional interesting consequences to the Central Limit Theorem when the population distribution is not normal.
