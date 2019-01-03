@@ -1,8 +1,7 @@
 Title: Independence and sampling in experimental design
-Date: 2018-12-26
+Date: 2019-01-02
 Category: Projects
 Authors: Aaron Wiegel
-Status: draft
 
 # Overview
 
@@ -10,7 +9,7 @@ Regardless of the application, calculating a particular statistic and associated
 
 In this blog post, I discuss independence, sampling, and experimental design in the context of my work as a data scientist at Synthego, a biotech manufacturing company. I use a simulated, clean, and simplified data set with features similar to our manufacturing data to demonstrate fundamental statistical concepts and challenges in experimental design. Although the context is chemistry and manufacturing, the core concepts are highly relevant in other contexts, such as designing an A/B testing framework.
 
-The data used in this blog post and the associated code are available via Github.
+The data used in this blog post and the associated code are available via [Github](https://github.com/aawiegel/PowerSimulationDemo).
 
 # Introduction
 
@@ -36,7 +35,7 @@ where the 8 rows correspond to the letters A through H, and the 12 columns corre
 
 ## Data definitions
 
-Synthetic (see what I did there), simplified, and clean data was randomly generated for the purposes of this blog post. Keep in mind that the real data from Synthego's manufacturing process (or from anything else for that matter) will not nearly be as clean or have as clear behavior as this. One thousand syntheses with 96 wells each were simulated to create a 960,000 row data set. The data contains several fields describing the amount and purity of the material and synthesis metadata. In the actual manufacturing process, impurities are measured with mass spectrometry and an algorithm that fits known and unknown impurity mass peaks in a spectrum. Common impurities include sequences with one extra or missing nucleotide (base) or with poor purification or post-processing.
+Synthetic (see what I did there), simplified, and clean data was randomly generated for the purposes of this blog post. Keep in mind that the real data from Synthego's manufacturing process (or from anything else for that matter) will not nearly be as clean or have as clear behavior as this. One thousand syntheses with 96 wells each were simulated to create a 96,000 row data set. The data contains several fields describing the amount and purity of the material and synthesis metadata. In the actual manufacturing process, impurities are measured with mass spectrometry and an algorithm that fits known and unknown impurity mass peaks in a spectrum. Common impurities include sequences with one extra or missing nucleotide (base) or with poor purification or post-processing.
 
 ### Metadata
 
@@ -82,7 +81,7 @@ plt.show()
 
 The distribution for the pure yield is pretty clearly normally distributed from this plot (The fit to the normal distribution almost entirely overlaps with the KDE plot.)
 
-We can use this same code snippet (rewritten as a function in the code on Github) to generate distribution plots for each of our metrics described above:
+We can use this same code snippet (rewritten as a function in the code on [Github](https://github.com/aawiegel/PowerSimulationDemo)) to generate distribution plots for each of our metrics described above:
 
 <img src="{static}/images/well_full_length_product.png" alt="Distribution of the full length product" style="width: 100%;"/>
 
@@ -163,12 +162,12 @@ Why do we see a much narrower distribution for a random sample of 96 wells versu
  
  Therefore, a random sample of 96 wells should have a standard deviation equal to the population standard deviation divided by the square root of 96. Let's compare the standard deviation for the entire population of wells, synthesis means, random sample means, and predictions of the Central Limit Theorem.
  
- | Group             | Mean  | Standard Deviation |
- | ----------------- | ----- | ------------------ |
- | Well (Population) | 9.976 | 2.922              |
- | Synthesis         | 9.976 | 2.513              |
- | Random Sample     | 9.981 | 0.291              |
- | Predicted         | 9.976 | 0.298              |
+ | Group             | Mean   | Standard Deviation |
+ | ----------------- | ------ | ------------------ |
+ | Well (Population) | 29.953 | 5.605              |
+ | Synthesis         | 29.953 | 5.025              |
+ | Random Sample     | 29.944 | 0.582              |
+ | Predicted         | 29.953 | 0.572              |
  
  Clearly, the random sample matches our predictions from the Central Limit Theorem, and the 96 wells on an individual synthesis are not random samples from the larger population of wells. We can see this another way by comparing the means between arbitrary subsets of a synthesis or random sample. In this case, I just compared the mean for wells on the left half of the 96-well plate to the mean for wells on the right half of the 96-well plate for a synthesis or random sample. For 96-well random samples, we see almost no correlation between the means from each side as shown below:
  
@@ -184,6 +183,10 @@ Thus, the wells on a synthesis are not independent units but are actually interd
 
 OK, so what? Sure, the Central Limit Theorem, sampling, independence, and all that are interesting in an abstract sense, but how does this help design better experiments? Well, if we're not careful about randomization in our experimental design, we could end up with spurious results! 
 
+<img src="https://imgs.xkcd.com/comics/significant.png" style="width: 80%" />
+
+One unfortunately common type of bad experimental design. (Credit: [XKCD](https://xkcd.com/882/))
+
 For example, let's suppose we are testing whether some new process change has a positive effect on pure yield. Our null and alternative hypotheses would then be the following:
 
 $H_0: \text{pure yield}_{\text{new}} = \text{pure yield}_{\text{old}}$
@@ -192,10 +195,10 @@ $H_a: \text{pure yield}_{\text{new}} > \text{pure yield}_{\text{old}}$
 
 We then run a single control synthesis with our old process and a single treatment synthesis with our new process and get the following results:
 
-| Synthesis ID | Experimental Group | Mean   | Standard Deviation |
-| ------------ | ------------------ | ------ | ------------------ |
-| 3            | Control            | 8.211  | 1.399              |
-| 4            | Treatment          | 13.314 | 1.554              |
+| Synthesis ID | Experimental Group | Mean    | Standard Deviation |
+| ------------ | ------------------ | ------- | ------------------ |
+| 3            | Control            | 26.431  | 2.331              |
+| 4            | Treatment          | 36.597  | 2.590              |
 
 Looks promising, right? We then naively assume that each well is independent and that a synthesis is a random sample of 96 wells. We perform a _t_-test with our experimental results and those assumptions as shown below:
 ```python
@@ -207,23 +210,23 @@ treatment_mask = df.synthesis_id == 4
 t_test_results = scipy.stats.ttest_ind(df.loc[treatment_mask, 'pure_yield'], 
                                        df.loc[control_mask, 'pure_yield']) 
 print(t_test_results)
-# Output: Ttest_indResult(statistic=21.579125882009635, pvalue=5.402301203063555e-53) 
+# Output: Ttest_indResult(statistic=28.581, pvalue=1.014e-70) 
 ``` 
  
-Whoa, our _t_-statistic is 23.9 with a _p_-value of $3 \times 10^{-59}$; we should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
+Whoa, our _t_-statistic is 28.6 with a _p_-value of $1 \times 10^{-70}$; we should definitely reject the null hypothesis. Clearly, our new process change is amazing, and we're super geniuses for thinking of it. Is that really true, though?
 
 Unfortunately, one of the key assumptions of the _t_ test is that the samples have been randomly drawn from the larger population. As we discussed earlier, a synthesis is not a random sample of 96 wells, though! So, our new process change might be amazing, but we don't have enough evidence of that yet. (Whether we're super geniuses also remains to be seen.) Realizing this, we perform several more syntheses to test our new process change:
 
 | Synthesis ID | Experimental Group | Mean   | Standard Deviation |
 | ------------ | ------------------ | ------ | ------------------ |
-| 3            | Control            | 8.211  | 1.399              |
-| 4            | Treatment          | 13.314 | 1.554              |
-| 5            | Control            | 6.607  | 1.603              |
-| 6            | Treatment          | 8.603  | 1.571              |
-| 7            | Control            | 11.220 | 1.255              |
-| 8            | Treatment          | 9.755  | 1.465              |
-| 9            | Control            | 14.086 | 1.485              |
-| 10           | Treatment          | 10.249 | 1.545              |
+| 3            | Control            | 26.431 | 2.331              |
+| 4            | Treatment          | 36.597 | 2.590              |
+| 5            | Control            | 23.218 | 2.671              |
+| 6            | Treatment          | 27.248 | 2.619              |
+| 7            | Control            | 32.588 | 2.091              |
+| 8            | Treatment          | 29.525 | 2.442              |
+| 9            | Control            | 38.142 | 2.475              |
+| 10           | Treatment          | 30.541 | 2.576              |
 
 We then run our _t_-test again, this time using the synthesis mean instead of the data from all 96 wells.
 
@@ -235,7 +238,7 @@ t_test_results = scipy.stats.ttest_ind(synthesis_df.loc[treatment_mask, 'pure_yi
                                        synthesis_df.loc[control_mask, 'pure_yield'])
 
 print(t_test_results)
-# Output: Ttest_indResult(statistic=0.23432685490410793, pvalue=0.8225225687422346)
+# Output: Ttest_indResult(statistic=0.228, pvalue=0.827)
 ```
  
 After correctly applying the _t_ test using appropriate assumptions, we find that we actually do not have enough evidence to reject the null hypothesis. Unfortunately, our new process is not nearly as amazing as we might have thought. (We still might be super geniuses, though.) Of course, we could be seeing a false negative since we may not done enough experiments yet, but that is a subject for another blog post. Either way, had we rushed into running a statistical test without thinking through the underlying assumptions, we could have made erroneous business or scientific recommendations that could have disasterous consequences! (Money lost, papers retracted, or worse)
